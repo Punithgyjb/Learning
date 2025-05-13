@@ -980,3 +980,75 @@ docker plugin install store/weaveworks/net-plugin:latest-release
 docker network create --driver weave mynetwork
 
 ```
+
+
+sudo docker pull nvidia/cuda:12.8.0-cudnn-runtime-ubuntu22.04
+ 
+sudo docker run -it --rm --gpus all nvidia/cuda:12.8.0-cudnn-runtime-ubuntu22.04 bash
+ 
+ 
+# runs docker image with bash prompt
+sudo docker run -it --gpus all --name hero-dev nvidia/cuda:12.8.0-cudnn-runtime-ubuntu22.04 bash
+ 
+# start docker image with persistent storage - all the changes made will be saved
+sudo docker start -ai hero-dev
+ 
+# copy files from host to docker image
+sudo docker cp ./CODE_MAIN hero-dev:/datadisk
+ 
+ 
+# create docker image from the persistent storage - for deployment
+sudo docker commit hero-dev hero-server-image
+ 
+------------
+# build a docker image for auto service start
+sudo docker build -t hero-server-image-auto .
+ 
+# start docker container
+sudo docker run --gpus all -p 5001:5001  --name hero-container-auto hero-server-image-auto
+ 
+sudo docker run --gpus all -d -p 5001:5001 --name hero-container-auto hero-server-image-auto
+docker exec -it hero-container-auto bash # to connect to running container
+ 
+ 
+# remove container if already exist
+sudo docker rm hero-container-auto
+ 
+ 
+# to check the container process
+sudo docker ps
+ 
+# to view the logs in real time (container)
+docker logs -f hero-container-auto
+ 
+ 
+# to stop the running container
+sudo docker stop hero-container-auto
+ 
+ 
+# save the docker image as tar file
+sudo docker save -o hero-server-image-auto.tar hero-server-image-auto
+ 
+ 
+# load from tar
+docker load -i hero-server-image-auto.tar
+ 
+ 
+ 
+# to make some changes to app and commit the changes to image.
+docker run -it --name hero-temp hero-server-image-auto:latest /bin/bash  # start
+ 
+docker commit hero-temp hero-server-image-auto:latest # commit changes
+ 
+docker rm hero-temp # remove temp
+ 
+docker run -it hero-server-image-auto:latest /bin/bash # start commmited
+ 
+docker build -t hero-server-image-auto .  
+ 
+docker run --gpus all -d -p 5001:5001 --name hero-container-auto hero-server-image-auto
+ 
+	docker stop hero-container-auto # top stop the container if already running
+	dokcer rm hero-container-auto # to remove container
+ 
+docker exec -it hero-container-auto bash # to connect to running container # to connect to running container
